@@ -1,0 +1,3 @@
+src/types/global.d.ts
+src/brain/templates/**
+src/extension/templates/**
