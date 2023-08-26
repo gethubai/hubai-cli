@@ -88,7 +88,7 @@ export function copyIfExist(src: string, dest: string): void {
   }
 }
 
-export type IBrainPackageResult = {
+export type IPackageResult = {
   error?: Error;
   packagePath?: string;
 };
@@ -96,8 +96,8 @@ export type IBrainPackageResult = {
 export async function packBrain({
   entryPointOverride,
   selfHostedUrl,
-}: PackBrainOptions): Promise<IBrainPackageResult> {
-  return new Promise<IBrainPackageResult>(async (resolve, reject) => {
+}: PackBrainOptions): Promise<IPackageResult> {
+  return new Promise<IPackageResult>(async (resolve, reject) => {
     try {
       const currentPath = process.cwd();
       const packageJsonPath = path.resolve(currentPath, 'package.json');

@@ -1,3 +1,5 @@
+/* eslint-disable no-async-promise-executor */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import fs from 'fs-extra';
 import archiver from 'archiver';
@@ -246,79 +248,88 @@ export function webpackBuild(
   });
 }
 
-export async function packExtension(): Promise<void> {
-  try {
-    const currentPath = process.cwd();
-    const packageJsonPath = path.resolve(currentPath, 'package.json');
-    const packageJson = readJsonFromPath(packageJsonPath);
+export type IPackageResult = {
+  error?: Error;
+  packagePath?: string;
+};
 
-    if (!packageJson) {
-      throw new Error('package.json not found');
-    }
+export async function packExtension(): Promise<IPackageResult> {
+  return new Promise<IPackageResult>(async (resolve, reject) => {
+    try {
+      const currentPath = process.cwd();
+      const packageJsonPath = path.resolve(currentPath, 'package.json');
+      const packageJson = readJsonFromPath(packageJsonPath);
 
-    const manifest = buildManifest(packageJson);
-    if (!manifest) return;
+      if (!packageJson) {
+        throw new Error('package.json not found');
+      }
 
-    // Create a temporary directory
-    const tempDir = path.resolve(__dirname, 'temp');
+      const manifest = buildManifest(packageJson);
+      if (!manifest) return;
 
-    if (fs.existsSync(tempDir)) {
-      fs.removeSync(tempDir); // delete old build
-    }
+      // Create a temporary directory
+      const tempDir = path.resolve(__dirname, 'temp');
 
-    fs.ensureDirSync(tempDir);
+      if (fs.existsSync(tempDir)) {
+        fs.removeSync(tempDir); // delete old build
+      }
 
-    fs.ensureDirSync(path.resolve(tempDir, 'src'));
+      fs.ensureDirSync(tempDir);
 
-    // Build using webpack
-    await webpackBuild(packageJson, path.join(tempDir, 'src'));
+      fs.ensureDirSync(path.resolve(tempDir, 'src'));
 
-    await fs.writeJSON(path.resolve(tempDir, 'manifest.json'), manifest);
+      // Build using webpack
+      await webpackBuild(packageJson, path.join(tempDir, 'src'));
 
-    copyIfExist(
-      path.resolve(currentPath, 'README.md'),
-      path.resolve(tempDir, 'README.md')
-    );
+      await fs.writeJSON(path.resolve(tempDir, 'manifest.json'), manifest);
 
-    copyIfExist(
-      path.resolve(currentPath, 'LICENSE'),
-      path.resolve(tempDir, 'LICENSE')
-    );
-
-    copyIfExist(
-      path.resolve(currentPath, 'CHANGELOG.MD'),
-      path.resolve(tempDir, 'CHANGELOG.MD')
-    );
-
-    if (packageJson.icon) {
       copyIfExist(
-        path.resolve(currentPath, packageJson.icon),
-        path.resolve(tempDir, packageJson.icon)
+        path.resolve(currentPath, 'README.md'),
+        path.resolve(tempDir, 'README.md')
       );
+
+      copyIfExist(
+        path.resolve(currentPath, 'LICENSE'),
+        path.resolve(tempDir, 'LICENSE')
+      );
+
+      copyIfExist(
+        path.resolve(currentPath, 'CHANGELOG.MD'),
+        path.resolve(tempDir, 'CHANGELOG.MD')
+      );
+
+      if (packageJson.icon) {
+        copyIfExist(
+          path.resolve(currentPath, packageJson.icon),
+          path.resolve(tempDir, packageJson.icon)
+        );
+      }
+
+      // Copy package.json to temp directory
+      fs.copySync(packageJsonPath, path.resolve(tempDir, 'package.json'));
+
+      // build the manifest
+      const outPackageName = `${packageJson.name ?? 'extension'}.hext`;
+
+      // Zip the files
+      const output = fs.createWriteStream(
+        path.resolve(currentPath, outPackageName)
+      );
+
+      const archive = archiver('zip', {
+        zlib: { level: 9 }, // Sets the compression level
+      });
+      output.on('close', () => {
+        logger.info('Manifest:', manifest);
+        logger.success('Extension successfully packed: ' + outPackageName);
+        resolve({ packagePath: path.resolve(currentPath, outPackageName) });
+      });
+      archive.pipe(output);
+      archive.directory(tempDir, false);
+      await archive.finalize();
+    } catch (error) {
+      logger.error('Error packing extension', error);
+      reject({ error: error as any });
     }
-
-    // Copy package.json to temp directory
-    fs.copySync(packageJsonPath, path.resolve(tempDir, 'package.json'));
-
-    // build the manifest
-    const outPackageName = `${packageJson.name ?? 'extension'}.hext`;
-
-    // Zip the files
-    const output = fs.createWriteStream(
-      path.resolve(currentPath, outPackageName)
-    );
-
-    const archive = archiver('zip', {
-      zlib: { level: 9 }, // Sets the compression level
-    });
-    output.on('close', () => {
-      logger.info('Manifest:', manifest);
-      logger.success('Extension successfully packed: ' + outPackageName);
-    });
-    archive.pipe(output);
-    archive.directory(tempDir, false);
-    await archive.finalize();
-  } catch (error) {
-    logger.error('Error packing extension', error);
-  }
+  });
 }

@@ -32,7 +32,7 @@ export class TemplateEngine {
     this.actions = {};
   }
 
-  showPromptForTemplateKind(kind: TemplateKind) {
+  showPromptForTemplateKind(kind: TemplateKind): void {
     const templates = this.getTemplates(kind);
 
     if (templates.length === 0) {
