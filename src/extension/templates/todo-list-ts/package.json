@@ -44,8 +44,9 @@
     },
     "publisher": "orgName",
     "keywords": [
-        "<%= extensionName %>",
-        "<%= displayName %>"
+        "todolist",
+        "todo",
+        "list"
     ],
     "categories": [
         "Other"

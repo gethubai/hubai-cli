@@ -43,8 +43,8 @@
     },
     "publisher": "orgName",
     "keywords": [
-        "<%= extensionName %>",
-        "<%= displayName %>"
+        "light",
+        "theme"
     ],
     "categories": [
         "Themes"

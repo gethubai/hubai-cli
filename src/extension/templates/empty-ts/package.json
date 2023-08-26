@@ -43,8 +43,7 @@
     },
     "publisher": "<%= publisher %>",
     "keywords": [
-        "<%= extensionName %>",
-        "<%= displayName %>"
+        "<%= extensionName %>"
     ],
     "categories": [
         "Other"

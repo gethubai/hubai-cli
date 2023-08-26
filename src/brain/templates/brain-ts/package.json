@@ -66,8 +66,7 @@
   },
   "author": "<%= publisher %>",
   "keywords": [
-    "<%= brainName %>",
-    "<%= displayName %>"
+    "<%= brainName %>"
   ],
   "categories": [
     "brain"
