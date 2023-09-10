@@ -16,6 +16,8 @@ import {
   IExtensionManifest,
   extensionManifestValidationSchema,
 } from './models/extensionManifest.js';
+import { IExtensionBuildContext } from './models/extensionBuildContext.js';
+import { loadChatContributes } from './contributes/loadChatContributes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,9 +82,17 @@ export function validateManifest(manifest: IExtensionManifest): void {
   }
 }
 
-export function copyIfExist(src: string, dest: string): void {
-  if (fs.existsSync(src)) {
+export function copyIfExist(
+  src: string,
+  dest: string,
+  throwOnNotFound = false
+): void {
+  const exists = fs.existsSync(src);
+
+  if (exists) {
     fs.copySync(src, dest);
+  } else if (throwOnNotFound) {
+    throw new Error(`File ${src} not found`);
   }
 }
 
@@ -278,35 +288,51 @@ export async function packExtension(): Promise<IPackageResult> {
 
       fs.ensureDirSync(path.resolve(tempDir, 'src'));
 
+      const buildContext = {
+        extensionPath: currentPath,
+        buildOutputPath: tempDir,
+        manifest,
+        getExtensionPath: (relativePath: string) =>
+          path.resolve(currentPath, relativePath),
+        getBuildOutputPath: (relativePath: string) =>
+          path.resolve(tempDir, relativePath),
+        copyToBuildOutput: (
+          fromExtensionRelativePath: string,
+          toBuildOutputRelativePath?: string
+        ) => {
+          copyIfExist(
+            path.resolve(currentPath, fromExtensionRelativePath),
+            path.resolve(
+              tempDir,
+              toBuildOutputRelativePath ?? fromExtensionRelativePath
+            )
+          );
+        },
+      } as IExtensionBuildContext;
+
+      const chatContributesResult = await loadChatContributes(buildContext);
+
+      if (!chatContributesResult) {
+        throw new Error('Chat contributes load failed');
+      }
+
       // Build using webpack
       await webpackBuild(packageJson, path.join(tempDir, 'src'));
 
-      await fs.writeJSON(path.resolve(tempDir, 'manifest.json'), manifest);
-
-      copyIfExist(
-        path.resolve(currentPath, 'README.md'),
-        path.resolve(tempDir, 'README.md')
+      await fs.writeJSON(
+        buildContext.getBuildOutputPath('manifest.json'),
+        buildContext.manifest
       );
 
-      copyIfExist(
-        path.resolve(currentPath, 'LICENSE'),
-        path.resolve(tempDir, 'LICENSE')
-      );
-
-      copyIfExist(
-        path.resolve(currentPath, 'CHANGELOG.MD'),
-        path.resolve(tempDir, 'CHANGELOG.MD')
-      );
+      buildContext.copyToBuildOutput('README.md');
+      buildContext.copyToBuildOutput('LICENSE');
+      buildContext.copyToBuildOutput('CHANGELOG.MD');
 
       if (packageJson.icon) {
-        copyIfExist(
-          path.resolve(currentPath, packageJson.icon),
-          path.resolve(tempDir, packageJson.icon)
-        );
+        buildContext.copyToBuildOutput(packageJson.icon);
       }
 
-      // Copy package.json to temp directory
-      fs.copySync(packageJsonPath, path.resolve(tempDir, 'package.json'));
+      buildContext.copyToBuildOutput('package.json');
 
       // build the manifest
       const outPackageName = `${packageJson.name ?? 'extension'}.hext`;
