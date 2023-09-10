@@ -27,7 +27,7 @@ export class TodoListExtension implements IExtension {
     };
 
     const activityBar = {
-      id: 'todoList.sidebarPane',
+      id: 'todoList.activityBar',
       name: 'TodoList',
       title: 'Todo List',
       icon: 'checklist',
