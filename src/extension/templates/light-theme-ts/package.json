@@ -3,13 +3,14 @@
     "version": "1.0.0",
     "description": "Example extension of a light theme for HubAI",
     "main": "./src/index.js",
-    "author": "orgName",
+    "icon": "public/light-mode-icon.png",
+    "author": "<%= publisher %>",
     "license": "MIT",
     "engines": {
         "hubai": "^0.0.1"
     },
     "dependencies": {
-        "@hubai/core": "^0.0.7",
+        "@hubai/core": "^0.0.12",
         "monaco-editor": "^0.31.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
@@ -41,10 +42,12 @@
         "webpack-dev-server": "4.11.1",
         "webpack-merge": "5.8.0"
     },
-    "publisher": "orgName",
+    "publisher": "<%= publisher %>",
     "keywords": [
         "light",
-        "theme"
+        "theme",
+        "github",
+        "plus"
     ],
     "categories": [
         "Themes"
@@ -60,9 +63,9 @@
             "themes": [
                 {
                     "id": "light-theme",
-                    "label": "Light Theme",
-                    "uiTheme": "vs",
-                    "path": "./themes/github-plus-theme.json"
+                    "label": "GitHub Plus Light",
+                    "uiTheme": "hubai",
+                    "path": "./src/themes/github-plus-theme.json"
                 }
             ]
         }
