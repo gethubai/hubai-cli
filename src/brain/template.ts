@@ -2,15 +2,20 @@ import templateEngine from '../templates/templateEngine.js';
 import { brainManifestValidationSchema } from './models/brainManifest.js';
 import { TemplateKind } from '../templates/models/template.js';
 import { validateFromSchema } from '../utils/validationUtils.js';
+import logger from '../logger.js';
+import { installNpmPackage } from '../utils/npmUtils.js';
 
-// TODO: Add action to install latest brain-sdk
+templateEngine.addAction('npm-install-brain-sdk', options => {
+  logger.info('Installing latest @hubai/brain-sdk package');
+  return installNpmPackage(options.targetPath, '@hubai/brain-sdk@latest');
+});
 
 templateEngine.addTemplate({
   name: 'brain-ts',
   description: 'Typescript template',
   kind: TemplateKind.Brain,
   path: 'brain/templates/brain-ts',
-  postActions: ['npm-install'],
+  postActions: ['npm-install', 'npm-install-brain-sdk'],
   questions: [
     {
       name: 'brainName',
