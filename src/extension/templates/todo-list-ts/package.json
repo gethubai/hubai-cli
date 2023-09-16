@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "description": "My TODO List extension",
     "main": "./src/index.js",
-    "author": "orgName",
+    "author": "<%= publisher %>",
+    "icon": "public/icon.png",
     "license": "MIT",
     "engines": {
         "hubai": "^0.0.1"
@@ -42,7 +43,7 @@
         "webpack-dev-server": "4.11.1",
         "webpack-merge": "5.8.0"
     },
-    "publisher": "orgName",
+    "publisher": "<%= publisher %>",
     "keywords": [
         "todolist",
         "todo",

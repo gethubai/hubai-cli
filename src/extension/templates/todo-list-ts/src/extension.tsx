@@ -27,7 +27,7 @@ export class TodoListExtension implements IExtension {
     };
 
     const activityBar = {
-      id: 'todoList.activityBar',
+      id: 'todoList.sidebarPane',
       name: 'TodoList',
       title: 'Todo List',
       icon: 'checklist',
@@ -47,7 +47,7 @@ export class TodoListExtension implements IExtension {
 
   dispose(context: AppContext): void {
     context.services.sidebar.remove('todoList.sidebarPane');
-    context.services.activityBar.remove('todoList.activityBar');
+    context.services.activityBar.remove('todoList.sidebarPane');
   }
 }
 
