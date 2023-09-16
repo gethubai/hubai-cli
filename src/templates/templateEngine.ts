@@ -12,6 +12,17 @@ const __dirname = path.dirname(__filename);
 
 const CURR_DIR = process.cwd();
 
+/* File extensions that the template engine will try to replace variables */
+const allowedTemplateEngineExtensions = [
+  '.json',
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.html',
+  '.md',
+];
+
 export type TemplateOptions = {
   projectName: string;
   templateName: string;
@@ -184,11 +195,18 @@ export class TemplateEngine {
       const filePath = path.join(CURR_DIR, projectName, file);
 
       if (stats.isFile()) {
-        // read file content and transform it using template engine
-        let contents = fs.readFileSync(origFilePath, 'utf8');
-        contents = render(contents, templateOptions);
-        // write file to destination folder
-        fs.writeFileSync(filePath, contents, 'utf8');
+        const fileExtension = path.extname(file);
+
+        // Check file extension
+        if (!allowedTemplateEngineExtensions.includes(fileExtension)) {
+          fs.copyFileSync(origFilePath, filePath); // If file extension is not allowed, just copy the file
+        } else {
+          // read file content and transform it using template engine
+          let contents = fs.readFileSync(origFilePath, 'utf8');
+          contents = render(contents, templateOptions);
+          // write file to destination folder
+          fs.writeFileSync(filePath, contents, 'utf8');
+        }
       } else if (stats.isDirectory()) {
         if (!fs.existsSync(filePath)) {
           // create folder in destination folder
