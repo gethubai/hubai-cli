@@ -18,6 +18,7 @@ import {
 } from './models/extensionManifest.js';
 import { IExtensionBuildContext } from './models/extensionBuildContext.js';
 import { loadChatContributes } from './contributes/loadChatContributes.js';
+import { loadThemeContributes } from './contributes/loadThemeContributes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -314,6 +315,11 @@ export async function packExtension(): Promise<IPackageResult> {
 
       if (!chatContributesResult) {
         throw new Error('Chat contributes load failed');
+      }
+
+      const themeContributesResult = await loadThemeContributes(buildContext);
+      if (!themeContributesResult) {
+        throw new Error('Theme contributes load failed');
       }
 
       // Build using webpack
