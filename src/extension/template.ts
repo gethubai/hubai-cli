@@ -121,7 +121,20 @@ templateEngine.addTemplate({
   kind: TemplateKind.Extension,
   path: 'extension/templates/todo-list-ts',
   postActions: ['npm-install', 'npm-install-hubai-core'],
-  questions: [],
+  questions: [
+    {
+      name: 'publisher',
+      type: 'input',
+      message: 'Publisher Name (Org. Name)',
+      default: 'orgName',
+      validate: (value: string) =>
+        validateFromSchema(
+          extensionManifestValidationSchema,
+          'publisher',
+          value
+        ),
+    },
+  ],
   skipFiles: [],
 });
 
@@ -131,6 +144,19 @@ templateEngine.addTemplate({
   kind: TemplateKind.Extension,
   path: 'extension/templates/light-theme-ts',
   postActions: ['npm-install', 'npm-install-hubai-core'],
-  questions: [],
+  questions: [
+    {
+      name: 'publisher',
+      type: 'input',
+      message: 'Publisher Name (Org. Name)',
+      default: 'orgName',
+      validate: (value: string) =>
+        validateFromSchema(
+          extensionManifestValidationSchema,
+          'publisher',
+          value
+        ),
+    },
+  ],
   skipFiles: [],
 });
