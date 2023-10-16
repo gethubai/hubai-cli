@@ -16,7 +16,7 @@ const brainCommands = [
         logger.info(`Packing self hosted brain to url ${str.selfHosted}`);
       await packBrain({
         entryPointOverride: str.selfHosted
-          ? './node_modules/@hubai/brain-sdk/src/services/selfHostedBrain.ts'
+          ? './node_modules/@hubai/brain-sdk/dist/services/selfHostedBrain.js'
           : undefined,
         selfHostedUrl: str.selfHosted,
       });
@@ -28,7 +28,7 @@ const brainCommands = [
         logger.info(`Packing self hosted brain to url ${str.selfHosted}`);
       const result = await packBrain({
         entryPointOverride: str.selfHosted
-          ? './node_modules/@hubai/brain-sdk/src/services/selfHostedBrain.ts'
+          ? './node_modules/@hubai/brain-sdk/dist/services/selfHostedBrain.js'
           : undefined,
         selfHostedUrl: str.selfHosted,
       });
