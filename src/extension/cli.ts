@@ -4,6 +4,7 @@ import './template.js';
 import templateEngine from '../templates/templateEngine.js';
 import { TemplateKind } from '../templates/models/template.js';
 import { publishPackage } from '../packageRegistry/publish.js';
+import { startExtensionDevServer } from './devServer.js';
 
 const extensionCommands = [
   new Command('package')
@@ -23,6 +24,12 @@ const extensionCommands = [
           packageType: 'extension',
         });
       }
+    }),
+
+  new Command('start-dev-server')
+    .description('Starts the development server for this extension')
+    .action(async options => {
+      await startExtensionDevServer();
     }),
 
   new Command('create')

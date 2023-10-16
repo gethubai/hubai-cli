@@ -83,6 +83,105 @@ export function validateManifest(manifest: IExtensionManifest): void {
   }
 }
 
+export function getWebpackOptions({ outputPath }: { outputPath: string }): any {
+  const packageJson = loadPackageJsonFromCurrentPath();
+  const { name, dependencies } = packageJson;
+
+  const federationConfig = {
+    name: name,
+    filename: 'remoteEntry.js',
+    library: { type: 'module' },
+    remotes: {},
+    exposes: { './Module': './src/remote-entry.ts' },
+    shared: {
+      ...dependencies,
+      '@hubai/core': {
+        singleton: true,
+        requiredVersion: dependencies['@hubai/core'],
+      },
+    },
+  };
+
+  if (dependencies.react) {
+    federationConfig.shared.react = {
+      singleton: true,
+      requiredVersion: dependencies.react,
+    };
+  }
+
+  if (dependencies['react-dom']) {
+    federationConfig.shared['react-dom'] = {
+      singleton: true,
+      requiredVersion: dependencies['react-dom'],
+    };
+  }
+
+  logger.debug('Federation config', federationConfig);
+
+  return {
+    entry: path.join(process.cwd(), packageJson.main),
+    mode: 'production',
+    devtool: 'cheap-source-map',
+    cache: false,
+    optimization: {
+      minimize: true,
+    },
+    output: {
+      path: outputPath,
+      publicPath: 'auto',
+      scriptType: 'module',
+      libraryTarget: undefined,
+      filename: '[name].[contenthash:20].js',
+      chunkFilename: '[name].[chunkhash:20].js',
+      hashFunction: 'xxhash64',
+      pathinfo: false,
+      crossOriginLoading: false,
+      uniqueName: `extension-${name}`,
+    },
+    experiments: { outputModule: true },
+    module: {
+      rules: [
+        {
+          test: /\.(js|ts)x?$/, // add |ts
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                '@babel/preset-typescript',
+                ['@babel/preset-env'],
+                '@babel/preset-react',
+              ],
+            },
+          },
+        },
+        {
+          test: /\.(css|less)$/,
+          use: ['style-loader', 'css-loader'],
+        },
+      ],
+    },
+    plugins: [
+      new ModuleFederationPlugin(federationConfig),
+      new HtmlWebpackPlugin({
+        template: 'public/index.html',
+        title: 'Extension',
+        filename: 'index.html',
+        chunks: ['main'],
+      }),
+    ],
+    resolve: {
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
+    },
+    target: 'web',
+    devServer: {
+      static: {
+        directory: outputPath,
+      },
+    },
+  };
+}
+
 export function copyIfExist(
   src: string,
   dest: string,
@@ -97,112 +196,12 @@ export function copyIfExist(
   }
 }
 
-export function webpackBuild(
-  packageJson: any,
-  outputPath: string
-): Promise<void> {
+export function webpackBuild(outputPath: string): Promise<void> {
   return new Promise((resolve, reject) => {
     try {
-      const currentPath = process.cwd();
-      const { name, dependencies } = packageJson;
-
-      const federationConfig = {
-        name: name,
-        filename: 'remoteEntry.js',
-        library: { type: 'module' },
-        remotes: {},
-        exposes: { './Module': './src/remote-entry.ts' },
-        shared: {
-          ...dependencies,
-          '@hubai/core': {
-            singleton: true,
-            requiredVersion: dependencies['@hubai/core'],
-          },
-        },
-      };
-
-      if (dependencies.react) {
-        federationConfig.shared.react = {
-          singleton: true,
-          requiredVersion: dependencies.react,
-        };
-      }
-
-      if (dependencies['react-dom']) {
-        federationConfig.shared['react-dom'] = {
-          singleton: true,
-          requiredVersion: dependencies['react-dom'],
-        };
-      }
-
-      logger.debug('Federation config', federationConfig);
-
-      const webpackOptions = {
-        entry: path.join(currentPath, packageJson.main),
-        mode: 'production',
-        devtool: 'cheap-source-map',
-        cache: false,
-        optimization: {
-          minimize: true,
-        },
-        output: {
-          path: outputPath,
-          publicPath: 'auto',
-          scriptType: 'module',
-          libraryTarget: undefined,
-          filename: '[name].[contenthash:20].js',
-          chunkFilename: '[name].[chunkhash:20].js',
-          hashFunction: 'xxhash64',
-          pathinfo: false,
-          crossOriginLoading: false,
-          uniqueName: `extension-${name}`,
-        },
-        experiments: { outputModule: true },
-        module: {
-          rules: [
-            {
-              test: /\.(js|ts)x?$/, // add |ts
-              exclude: /node_modules/,
-              use: {
-                loader: 'babel-loader',
-                options: {
-                  presets: [
-                    '@babel/preset-typescript',
-                    ['@babel/preset-env'],
-                    '@babel/preset-react',
-                  ],
-                },
-              },
-            },
-            {
-              test: /\.(css|less)$/,
-              use: ['style-loader', 'css-loader'],
-            },
-          ],
-        },
-        plugins: [
-          new ModuleFederationPlugin(federationConfig),
-          new HtmlWebpackPlugin({
-            template: 'public/index.html',
-            title: 'Extension',
-            filename: 'index.html',
-            chunks: ['main'],
-          }),
-        ],
-        resolve: {
-          extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-        },
-        target: 'web',
-        devServer: {
-          static: {
-            directory: outputPath,
-          },
-        },
-      };
-
       //logger.debug('Webpack options', webpackOptions);
 
-      const compiler = webpack(webpackOptions as any);
+      const compiler = webpack(getWebpackOptions({ outputPath }));
 
       compiler.run((err, stats) => {
         if (err) {
@@ -264,16 +263,82 @@ export type IPackageResult = {
   packagePath?: string;
 };
 
+export function loadPackageJsonFromCurrentPath(): any {
+  const currentPath = process.cwd();
+  const packageJsonPath = path.resolve(currentPath, 'package.json');
+  const packageJson = readJsonFromPath(packageJsonPath);
+
+  if (!packageJson) {
+    throw new Error('package.json not found in current path');
+  }
+
+  return packageJson;
+}
+
+export async function generateBuild(
+  manifest: IExtensionManifest,
+  tempDir: string
+): Promise<void> {
+  const currentPath = process.cwd();
+
+  fs.ensureDirSync(tempDir);
+
+  fs.ensureDirSync(path.resolve(tempDir, 'src'));
+
+  const buildContext = {
+    extensionPath: currentPath,
+    buildOutputPath: tempDir,
+    manifest,
+    getExtensionPath: (relativePath: string) =>
+      path.resolve(currentPath, relativePath),
+    getBuildOutputPath: (relativePath: string) =>
+      path.resolve(tempDir, relativePath),
+    copyToBuildOutput: (
+      fromExtensionRelativePath: string,
+      toBuildOutputRelativePath?: string
+    ) => {
+      copyIfExist(
+        path.resolve(currentPath, fromExtensionRelativePath),
+        path.resolve(
+          tempDir,
+          toBuildOutputRelativePath ?? fromExtensionRelativePath
+        )
+      );
+    },
+  } as IExtensionBuildContext;
+
+  const chatContributesResult = await loadChatContributes(buildContext);
+
+  if (!chatContributesResult) {
+    throw new Error('Chat contributes load failed');
+  }
+
+  const themeContributesResult = await loadThemeContributes(buildContext);
+  if (!themeContributesResult) {
+    throw new Error('Theme contributes load failed');
+  }
+
+  await fs.writeJSON(
+    buildContext.getBuildOutputPath('manifest.json'),
+    buildContext.manifest
+  );
+
+  buildContext.copyToBuildOutput('README.md');
+  buildContext.copyToBuildOutput('LICENSE');
+  buildContext.copyToBuildOutput('CHANGELOG.MD');
+
+  if (manifest.icon) {
+    buildContext.copyToBuildOutput(manifest.icon);
+  }
+
+  buildContext.copyToBuildOutput('package.json');
+}
+
 export async function packExtension(): Promise<IPackageResult> {
   return new Promise<IPackageResult>(async (resolve, reject) => {
     try {
       const currentPath = process.cwd();
-      const packageJsonPath = path.resolve(currentPath, 'package.json');
-      const packageJson = readJsonFromPath(packageJsonPath);
-
-      if (!packageJson) {
-        throw new Error('package.json not found');
-      }
+      const packageJson = loadPackageJsonFromCurrentPath();
 
       const manifest = buildManifest(packageJson);
       if (!manifest) return;
@@ -285,60 +350,10 @@ export async function packExtension(): Promise<IPackageResult> {
         fs.removeSync(tempDir); // delete old build
       }
 
-      fs.ensureDirSync(tempDir);
-
-      fs.ensureDirSync(path.resolve(tempDir, 'src'));
-
-      const buildContext = {
-        extensionPath: currentPath,
-        buildOutputPath: tempDir,
-        manifest,
-        getExtensionPath: (relativePath: string) =>
-          path.resolve(currentPath, relativePath),
-        getBuildOutputPath: (relativePath: string) =>
-          path.resolve(tempDir, relativePath),
-        copyToBuildOutput: (
-          fromExtensionRelativePath: string,
-          toBuildOutputRelativePath?: string
-        ) => {
-          copyIfExist(
-            path.resolve(currentPath, fromExtensionRelativePath),
-            path.resolve(
-              tempDir,
-              toBuildOutputRelativePath ?? fromExtensionRelativePath
-            )
-          );
-        },
-      } as IExtensionBuildContext;
-
-      const chatContributesResult = await loadChatContributes(buildContext);
-
-      if (!chatContributesResult) {
-        throw new Error('Chat contributes load failed');
-      }
-
-      const themeContributesResult = await loadThemeContributes(buildContext);
-      if (!themeContributesResult) {
-        throw new Error('Theme contributes load failed');
-      }
+      await generateBuild(manifest, tempDir);
 
       // Build using webpack
-      await webpackBuild(packageJson, path.join(tempDir, 'src'));
-
-      await fs.writeJSON(
-        buildContext.getBuildOutputPath('manifest.json'),
-        buildContext.manifest
-      );
-
-      buildContext.copyToBuildOutput('README.md');
-      buildContext.copyToBuildOutput('LICENSE');
-      buildContext.copyToBuildOutput('CHANGELOG.MD');
-
-      if (packageJson.icon) {
-        buildContext.copyToBuildOutput(packageJson.icon);
-      }
-
-      buildContext.copyToBuildOutput('package.json');
+      await webpackBuild(path.join(tempDir, 'src'));
 
       // build the manifest
       const outPackageName = `${packageJson.name ?? 'extension'}.hext`;
