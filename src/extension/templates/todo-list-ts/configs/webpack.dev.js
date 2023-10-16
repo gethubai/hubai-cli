@@ -18,5 +18,8 @@ module.exports = merge(webpackBaseConfig, {
     hot: true,
     compress: false,
     historyApiFallback: false,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
   },
 });

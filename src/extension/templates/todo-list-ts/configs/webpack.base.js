@@ -17,10 +17,8 @@ module.exports = {
     chunkFilename: '[name].[chunkhash:20].js',
     hashFunction: 'xxhash64',
     pathinfo: false,
-    scriptType: 'module',
     crossOriginLoading: false,
     uniqueName: `extension-${name}`,
-    publicPath: 'auto',
   },
   experiments: { outputModule: true },
 
@@ -34,9 +32,7 @@ module.exports = {
           options: {
             presets: [
               '@babel/preset-typescript',
-              [
-                '@babel/preset-env'
-              ],
+              ['@babel/preset-env'],
               '@babel/preset-react',
             ],
           },
@@ -44,8 +40,8 @@ module.exports = {
       },
       {
         test: /\.(css|less)$/,
-        use: ["style-loader", "css-loader"]
-      }
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
   plugins: [

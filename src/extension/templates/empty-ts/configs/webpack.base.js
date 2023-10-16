@@ -17,10 +17,8 @@ module.exports = {
     chunkFilename: '[name].[chunkhash:20].js',
     hashFunction: 'xxhash64',
     pathinfo: false,
-    scriptType: 'module',
     crossOriginLoading: false,
     uniqueName: `extension-${name}`,
-    publicPath: 'auto',
   },
   experiments: { outputModule: true },
 
