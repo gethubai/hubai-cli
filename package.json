@@ -1,7 +1,7 @@
 {
-  "name": "hubai-cli",
-  "version": "0.0.1-alpha",
-  "description": "HubAI CLI for creating extensions and brains",
+  "name": "@hubai/cli",
+  "version": "0.0.5-alpha",
+  "description": "HubAI CLI is a helper for building extensions and brains for the HubAI platform",
   "type": "module",
   "files": [
     "!lib/__tests__/**/*",
@@ -12,6 +12,9 @@
   ],
   "bin": {
     "hubai": "./bin/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
@@ -29,10 +32,10 @@
     "type": "git",
     "url": "git+https://github.com/gethubai/hubai-cli.git"
   },
-  "license": "MIT",
+  "license": "GPL",
   "author": {
     "name": "Matheus Diniz",
-    "email": "mtsdnz@hotmail.com",
+    "email": "contact@hubai.app",
     "url": "https://github.com/mtsdnz"
   },
   "engines": {
@@ -41,8 +44,8 @@
   "keywords": [
     "hubai",
     "cli",
-    "template",
-    "brain",
+    "hub-ai",
+    "hub ai",
     "extension"
   ],
   "bugs": {
@@ -51,15 +54,22 @@
   "homepage": "https://github.com/gethubai/hubai-cli#readme",
   "dependencies": {
     "archiver": "^5.3.1",
+    "chalk": "^4.1.1",
     "commander": "^7.2.0",
+    "ejs": "^3.1.9",
     "esbuild": "^0.18.17",
+    "esbuild-plugin-replace": "^1.4.0",
     "form-data": "^4.0.0",
     "fs-extra": "^11.1.1",
+    "html-webpack-plugin": "^5.5.3",
     "inquirer": "^9.2.9",
     "joi": "^17.9.2",
     "jwt-decode": "^3.1.2",
     "keytar": "^7.9.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "shelljs": "^0.8.5",
+    "webpack": "^5.88.2",
+    "webpack-dev-server": "^4.15.1"
   },
   "devDependencies": {
     "@ryansonshine/commitizen": "^4.2.8",
@@ -73,32 +83,21 @@
     "@types/shelljs": "^0.8.12",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.33.0",
-    "chalk": "^4.1.1",
     "conventional-changelog-conventionalcommits": "^5.0.0",
-    "ejs": "^3.1.9",
-    "esbuild-plugin-replace": "^1.4.0",
     "eslint": "^7.25.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.4.0",
-    "html-webpack-plugin": "^5.5.3",
     "husky": "^6.0.0",
     "jest": "^27.2.0",
     "lint-staged": "^13.2.1",
     "prettier": "^2.2.1",
     "semantic-release": "^21.0.1",
-    "shelljs": "^0.8.5",
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
     "typescript": "^4.2.4",
-    "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
     "webpack-merge": "^5.9.0"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/@ryansonshine/cz-conventional-changelog"
-    }
   },
   "lint-staged": {
     "!(src/brain/templates/**/*|src/extension/templates/**/*)*.ts": "eslint --fix"
