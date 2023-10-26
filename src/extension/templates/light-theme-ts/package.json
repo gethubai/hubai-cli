@@ -16,7 +16,7 @@
         "react-dom": "^18.2.0"
     },
     "scripts": {
-        "start": "webpack --watch --config configs/webpack.dev.js",
+        "start": "hubai extension start-dev-server",
         "build": "webpack --progress --config configs/webpack.prod.js",
         "serve": "webpack serve --config configs/webpack.dev.js",
         "dev": "npm-run-all --parallel start serve",
