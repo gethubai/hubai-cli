@@ -1,6 +1,6 @@
 {
   "name": "@hubai/cli",
-  "version": "0.0.5-alpha",
+  "version": "0.0.6-alpha",
   "description": "HubAI CLI is a helper for building extensions and brains for the HubAI platform",
   "type": "module",
   "files": [
