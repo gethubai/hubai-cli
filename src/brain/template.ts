@@ -50,6 +50,14 @@ templateEngine.addTemplate({
           name: 'voice_transcription',
           checked: false,
         },
+        {
+          name: 'image_recognition',
+          checked: false,
+        },
+        {
+          name: 'image_generation',
+          checked: false,
+        },
       ],
       validate: value =>
         validateFromSchema(
