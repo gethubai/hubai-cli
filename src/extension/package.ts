@@ -46,7 +46,8 @@ export function buildManifest(
             setting.required,
             setting.defaultValue,
             setting.enumValues,
-            setting.description
+            setting.description,
+            setting.isSecret
           )
       ),
       extensionKind: packageJson.extension.extensionKind,

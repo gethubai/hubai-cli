@@ -47,7 +47,9 @@ export function buildManifest(packageJson: any): IBrainManifest | undefined {
             setting.defaultValue,
             setting.enumValues,
             setting.description,
-            setting.scope
+            setting.isSecret,
+            setting.scope,
+            setting.capabilities
           )
       ),
       publisher: packageJson.publisher,

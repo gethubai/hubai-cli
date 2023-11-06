@@ -21,6 +21,7 @@ export interface ISettingMap {
   required: boolean;
 
   description?: string;
+  isSecret?: boolean;
 }
 
 export class SettingMap implements ISettingMap {
@@ -46,6 +47,7 @@ export class SettingMap implements ISettingMap {
       .items(Joi.string().trim().min(1).max(60))
       .when('type', { is: 'string', otherwise: Joi.forbidden() }),
     description: Joi.string().optional(),
+    isSecret: Joi.boolean().optional(),
   }).id('ISettingMap');
   name: string;
 
@@ -60,6 +62,7 @@ export class SettingMap implements ISettingMap {
   required: boolean;
 
   description?: string;
+  isSecret?: boolean;
 
   constructor(
     name: string,
@@ -68,7 +71,8 @@ export class SettingMap implements ISettingMap {
     required?: boolean,
     defaultValue?: string,
     enumValues?: string[],
-    description?: string
+    description?: string,
+    isSecret?: boolean
   ) {
     const { error } = SettingMap.validationSchema.validate({
       name,
@@ -78,6 +82,7 @@ export class SettingMap implements ISettingMap {
       defaultValue,
       enumValues,
       description,
+      isSecret,
     });
 
     if (error) {
@@ -91,6 +96,7 @@ export class SettingMap implements ISettingMap {
     this.enumValues = enumValues;
     this.required = required === undefined ? false : required;
     this.description = description;
+    this.isSecret = isSecret;
   }
 
   parseSettingType(typeString: string): SettingType {

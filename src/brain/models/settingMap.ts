@@ -11,9 +11,15 @@ export enum BrainSettingScope {
 
 export class LocalBrainSettingMap extends SettingMap {
   scope: BrainSettingScope;
+  /* Specify which brain_capability this configuration applies to (leave empty for all) */
+  capabilities?: string[] = [];
 
   static validationSchema = Joi.object({
     scope: Joi.string().valid('application', 'chat_overridable').optional(),
+    capabilities: Joi.array()
+      .items(Joi.string().required())
+      .unique()
+      .optional(),
   });
 
   constructor(
@@ -24,7 +30,9 @@ export class LocalBrainSettingMap extends SettingMap {
     defaultValue?: string,
     enumValues?: string[],
     description?: string,
-    scope?: string
+    isSecret?: boolean,
+    scope?: string,
+    capabilities?: string[]
   ) {
     super(
       name,
@@ -33,7 +41,8 @@ export class LocalBrainSettingMap extends SettingMap {
       required,
       defaultValue,
       enumValues,
-      description
+      description,
+      isSecret
     );
 
     const { error } = LocalBrainSettingMap.validationSchema.validate({ scope });
@@ -45,6 +54,7 @@ export class LocalBrainSettingMap extends SettingMap {
     this.scope = scope
       ? this.parseBrainSettingScope(scope)
       : BrainSettingScope.APPLICATION;
+    this.capabilities = capabilities;
   }
 
   parseBrainSettingScope(scopeString: string): BrainSettingScope {
