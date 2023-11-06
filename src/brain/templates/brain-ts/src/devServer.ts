@@ -27,4 +27,11 @@ app.post('/api/textPrompt', async function (request, response) {
   return response.json(result);
 });
 
+app.post('/api/imageGeneration', async function (request, response) {
+  const {prompts, context} = request.body;
+
+  const result = await brain.generateImage(prompts, context);
+  return response.json(result);
+});
+
 app.listen(port, host);

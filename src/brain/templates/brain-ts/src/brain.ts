@@ -7,6 +7,8 @@ import {
   TextBrainPrompt,
   IBrainPromptContext,
   BrainSettingsValidationResult,
+  IImageGenerationBrainService,
+  ImageGenerationBrainPrompt,
 } from '@hubai/brain-sdk';
 
 /* Example of setting required by this brain */
@@ -21,7 +23,8 @@ export default class MyBrainService
   implements
     IBrainService,
     ITextBrainService<ISettings>,
-    IAudioTranscriberBrainService<ISettings>
+    IAudioTranscriberBrainService<ISettings>,
+    IImageGenerationBrainService<ISettings>,
 {
   async transcribeAudio(
     prompt: LocalAudioPrompt,
@@ -43,6 +46,18 @@ export default class MyBrainService
 
     return Promise.resolve({
       result: 'Text prompt received:\n ``json \n' + JSON.stringify(prompts) + '\n``',
+      validationResult,
+    });
+  }
+
+  generateImage(
+    prompts: ImageGenerationBrainPrompt[],
+    context: IBrainPromptContext<ISettings>,
+  ): Promise<BrainPromptResponse> {
+    const validationResult = this.validateSettings(context.settings);
+
+    return Promise.resolve({
+      result: 'Image prompt received:\n ``json \n' + JSON.stringify(prompts) + '\n``',
       validationResult,
     });
   }
