@@ -1,6 +1,6 @@
 {
   "name": "@hubai/cli",
-  "version": "0.0.6-alpha",
+  "version": "0.0.7",
   "description": "HubAI CLI is a helper for building extensions and brains for the HubAI platform",
   "type": "module",
   "files": [
@@ -26,7 +26,8 @@
     "semantic-release": "semantic-release",
     "test:watch": "jest --watch",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "bump-version-patch": "npm version patch --no-git-tag-version"
   },
   "repository": {
     "type": "git",
