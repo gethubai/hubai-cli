@@ -6,7 +6,7 @@
   "main": "./src/main.js",
   "engines": {
     "node": ">= 18.12 <19",
-    "hubai": "^0.0.1"
+    "hubai": ">= 0.1.0-alpha.13 || 1.x"
   },
   "scripts": {
     "start": "nodemon ./src/devServer.ts",
