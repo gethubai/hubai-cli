@@ -51,9 +51,9 @@ export const chatCommandCompletionValidationSchema = Joi.object({
     .required()
     .min(2)
     .max(50),
-  insertText: Joi.string().required().min(2).max(1200),
-  shortDescription: Joi.string().optional().min(2).max(100),
-  description: Joi.string().optional().min(2).max(600),
+  insertText: Joi.string().required().min(2).max(5000),
+  shortDescription: Joi.string().optional().min(2).max(120),
+  description: Joi.string().optional().min(2).max(900),
   command: Joi.string()
     .optional()
     .min(2)
