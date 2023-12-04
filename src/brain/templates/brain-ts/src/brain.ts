@@ -24,7 +24,7 @@ export default class MyBrainService
     IBrainService,
     ITextBrainService<ISettings>,
     IAudioTranscriberBrainService<ISettings>,
-    IImageGenerationBrainService<ISettings>,
+    IImageGenerationBrainService<ISettings>
 {
   async transcribeAudio(
     prompt: LocalAudioPrompt,
