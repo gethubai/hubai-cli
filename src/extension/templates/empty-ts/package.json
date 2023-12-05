@@ -6,10 +6,10 @@
     "author": "<%= publisher %>",
     "license": "MIT",
     "engines": {
-        "hubai": ">= 0.1.0-alpha.13 || 1.x"
+        "hubai": ">= 0.1.0-alpha.14 || 1.x"
     },
     "dependencies": {
-        "@hubai/core": "^0.0.22",
+        "@hubai/core": "^0.0.29",
         "monaco-editor": "^0.31.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
