@@ -1,18 +1,16 @@
 import path from 'path';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
+import { pathToFileURL } from 'url';
 import { getWebpackOptions } from './package.js';
 import HubaiWebpackPlugin from './webpack/hubai-plugin.js';
 
 export async function startExtensionDevServer(): Promise<void> {
+  const filePath = path.join(process.cwd(), 'configs', 'webpack.dev.js');
+  const fileUrl = pathToFileURL(filePath);
+
   const webpackConfig = (
-    await import(
-      /* webpackIgnore: true */ path.join(
-        process.cwd(),
-        'configs',
-        'webpack.dev.js'
-      )
-    )
+    await import(/* webpackIgnore: true */ fileUrl.toString())
   ).default;
 
   const outputPath = path.join(process.cwd(), 'dist');
